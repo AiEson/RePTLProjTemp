@@ -82,7 +82,7 @@ class PublicSMPModel(pl.LightningModule):
             pred_mask.long(), mask.long(), mode="binary"
         )
         return {
-            "loss": loss,
+            f"{stage}/loss": loss,
             "tp": tp,
             "fp": fp,
             "fn": fn,

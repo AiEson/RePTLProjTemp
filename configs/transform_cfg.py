@@ -29,5 +29,6 @@ def get_train_transform(img_size=512):
     )
     return trfm
 
+
 def get_base_transform():
     pass
