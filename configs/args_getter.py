@@ -23,4 +23,7 @@ def get_args():
 
     arg('--use_swa', type=bool, default=False)
 
+    arg('--optim_name', type=str, default='adam')
+    arg('--sche_name', type=str, default='coswarmrestart')
+
     return parser.parse_args()
