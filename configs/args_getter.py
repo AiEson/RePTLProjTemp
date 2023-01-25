@@ -14,6 +14,8 @@ def get_args():
     arg("--name", type=str, default="DeeplabV3_ResNet34")
     arg("--encoder_name", type=str, default="resnet34")
 
+    arg('--seed', type=int, default=42)
+
     arg("--epoch", type=int, default=5)
     arg("--batch_size", type=int, default=16)
     arg("--acc_batch", type=int, default=1)

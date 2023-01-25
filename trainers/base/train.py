@@ -61,14 +61,28 @@ def main() -> None:
     callback_list = [checkpoint_callback, early_stop_callback]
     # SWA
     if args.use_swa:
-        callback_list.append(pl.callbacks.StochasticWeightAveraging(swa_lrs=1e-4)) # noqa
+        callback_list.append(
+            pl.callbacks.StochasticWeightAveraging(swa_lrs=1e-4)
+        )  # noqa
 
     # Make Trainer
 
     trainer = pl.Trainer(
-            accelerator='gpu',
-            gpus=-1
-            )
+        accelerator="gpu",
+        devices=args.gpus,
+        log_every_n_steps=50,
+        strategy="ddp_find_unused_parameters_false",
+        logger=wandb_logger,
+        callbacks=callback_list,
+        accumulate_grad_batches=args.acc_batch,
+        precision=args.precision,
+        max_epochs=args.epochs,
+    )
+    # Start Train
+
+    trainer.fit(model=model)
+
+    wandb.finish()
 
 
 if __name__ == "__main__":

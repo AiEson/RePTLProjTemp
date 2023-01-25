@@ -7,6 +7,8 @@ import pandas as pd
 import torch.utils.data as D
 from torchvision import transforms as T
 
+from configs.transform_cfg import get_train_transform
+
 warnings.filterwarnings("ignore")
 
 
@@ -30,7 +32,9 @@ def rle_decode(mask_rle, shape=(512, 512)):
 
     """
     s = mask_rle.split()
-    starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
+    starts, lengths = [
+        np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])
+    ]  # noqa
     starts -= 1
     ends = starts + lengths
     img = np.zeros(shape[0] * shape[1], dtype=np.uint8)
@@ -72,7 +76,7 @@ class TianChiDataset(D.Dataset):
         return self.len
 
 
-def get_building_dataset(dataset_path: str):
+def get_building_dataset(dataset_path: str, img_size=512):
     """Get the dataset by dataset_path.
 
     Parameters
@@ -97,7 +101,7 @@ def get_building_dataset(dataset_path: str):
     dataset = TianChiDataset(
         train_mask["name"].values,
         train_mask["mask"].fillna("").values,
-        trfm,
+        get_train_transform(img_size),
         False,
     )
 

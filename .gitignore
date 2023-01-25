@@ -130,4 +130,10 @@ dmypy.json
 
 # Dataset Folder
 dataset/
-.DS_Store
+**/.DS_Store
+**/**/.DS_Store
+**/**/**/.DS_Store
+
+
+**/wandb/
+**/**/wandb/

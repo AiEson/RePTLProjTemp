@@ -47,6 +47,7 @@ class PublicSMPModel(pl.LightningModule):
         else:
             self.model = model
 
+        self.args = args
         # Config the dataset
         self.get_train_val_set()
 
@@ -142,11 +143,13 @@ class PublicSMPModel(pl.LightningModule):
 
     def configure_optimizers(self):
         return config_optimizers(
-            optim_name="adamw", sche_name="coswarmrestart", model=self
-        )  # noqa
+            optim_name=self.args.optim_name,
+            sche_name=self.args.sche_name,
+            model=self,  # model is self
+        )
 
     def get_train_val_set(self):
-        all_set = get_building_dataset(dataset_path=self.args.dataset_path)
+        all_set = get_building_dataset(dataset_path=self.args.dataset_dir)
         setlen = len(all_set)
         self.train_set, self.val_set = random_split(
             all_set, [int(setlen * 0.8), int(setlen * 0.2)]
