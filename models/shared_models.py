@@ -16,7 +16,7 @@ sys.path.append(
 
 from configure_optimizers import config_optimizers  # noqa
 
-from configs.loss_cfg import get_loss_result  # noqa
+from configs.loss_cfg import get_loss_result, loss_fn  # noqa
 from datasets import get_building_dataset  # noqa
 
 
@@ -50,6 +50,8 @@ class PublicSMPModel(pl.LightningModule):
         self.args = args
         # Config the dataset
         self.get_train_val_set()
+        # Config the loss_fn
+        self.loss_fn = loss_fn
 
     def forward(self, x):
         x = self.model(x)
@@ -74,7 +76,7 @@ class PublicSMPModel(pl.LightningModule):
         logits_mask = self(image)
 
         # get loss
-        loss = self.loss_fn(logits_mask, mask)
+        loss = self.loss_fn(logits_mask, mask.float())
 
         prob_mask = logits_mask.sigmoid()
         pred_mask = (prob_mask > 0.5).float()
@@ -83,7 +85,7 @@ class PublicSMPModel(pl.LightningModule):
             pred_mask.long(), mask.long(), mode="binary"
         )
         return {
-            f"{stage}/loss": loss,
+            "loss": loss,
             "tp": tp,
             "fp": fp,
             "fn": fn,
@@ -121,7 +123,7 @@ class PublicSMPModel(pl.LightningModule):
             f"{stage}/prec": dataset_prec,
         }
 
-        self.log_dict(metrics, prog_bar=True)
+        self.log_dict(metrics, prog_bar=False)
 
     def training_step(self, batch, batch_idx):
         return self.shared_step(batch, "train")

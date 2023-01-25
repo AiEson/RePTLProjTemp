@@ -55,7 +55,7 @@ def main() -> None:
     )
 
     early_stop_callback = EarlyStopping(
-        monitor="val/loss", min_delta=1, patience=50, mode="min"
+        monitor="val/iou", min_delta=1, patience=50, mode="min"
     )
 
     callback_list = [checkpoint_callback, early_stop_callback]

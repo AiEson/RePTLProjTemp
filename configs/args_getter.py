@@ -16,7 +16,7 @@ def get_args():
 
     arg('--seed', type=int, default=42)
 
-    arg("--epoch", type=int, default=5)
+    arg("--epochs", type=int, default=5)
     arg("--batch_size", type=int, default=16)
     arg("--acc_batch", type=int, default=1)
     arg("--gpus", type=int, default=-1)

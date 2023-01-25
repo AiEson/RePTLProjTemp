@@ -137,3 +137,6 @@ dataset/
 
 **/wandb/
 **/**/wandb/
+
+trainers/**
+!trainers/base
