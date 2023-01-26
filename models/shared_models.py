@@ -13,7 +13,7 @@ sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), 
 
 from configs.loss_cfg import get_loss_result, loss_fn  # noqa
 from configs.metrics_cfg import get_metrics_collection  # noqa
-from configs.optim_sche_cfg import get_config_optimizers # noqa
+from configs.optim_sche_cfg import get_config_optimizers  # noqa
 from datasets import get_building_dataset  # noqa
 
 
@@ -31,6 +31,7 @@ class PublicSMPModel(pl.LightningModule):
     """
 
     def __init__(self, model: smp.base.SegmentationModel = None, args=None):
+
         super().__init__()
         if model is None:
             self.model = smp.DeepLabV3Plus(
@@ -57,15 +58,11 @@ class PublicSMPModel(pl.LightningModule):
 
         # for image segmentation dice loss could be the best first choice
         # self.loss_fn = smp.losses.DiceLoss(smp.losses.BINARY_MODE, from_logits=True)
-        self.loss_fn = smp.losses.SoftBCEWithLogitsLoss()
 
         # Config the loss_fn
-        # self.loss_fn = loss_fn
+        self.loss_fn = get_loss_result
 
     def forward(self, x):
-        # x = self.model(x)
-        # return x
-        # normalize image here #todo
         x = (x - self.mean) / self.std
         mask = self.model(x)
         return mask
@@ -102,47 +99,11 @@ class PublicSMPModel(pl.LightningModule):
         else:
             self.val_metrics.update(prob_mask, mask.long())
 
-        # tp, fp, tn, fn = smp.metrics.get_stats(
-        #     pred_mask.long(), mask.long(), mode="binary"
-        # )
         return {
             "loss": loss,
-            # "tp": tp,
-            # "fp": fp,
-            # "fn": fn,
-            # "tn": tn,
         }
 
     def shared_epoch_end(self, outputs, stage):
-        # aggregate step metics
-        # tp = torch.cat([x["tp"] for x in outputs])
-        # fp = torch.cat([x["fp"] for x in outputs])
-        # fn = torch.cat([x["fn"] for x in outputs])
-        # tn = torch.cat([x["tn"] for x in outputs])
-
-        # per image IoU means that we first calculate IoU score for each image
-        # and then compute mean over these scores
-        # per_image_iou = smp.metrics.iou_score(
-        #     tp, fp, fn, tn, reduction="micro-imagewise"
-        # )
-
-        # dataset_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
-        # dataset_f1 = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro")
-        # dataset_acc = smp.metrics.accuracy(tp, fp, fn, tn, reduction="micro")
-        # dataset_bacc = smp.metrics.balanced_accuracy(tp, fp, fn, tn, reduction="micro")
-        # dataset_prec = smp.metrics.precision(tp, fp, fn, tn, reduction="micro")
-        # dataset_rec = smp.metrics.recall(tp, fp, fn, tn, reduction="micro")
-
-        # metrics = {
-        #     f"{stage}/iou": dataset_iou,
-        #     f"{stage}/f1": dataset_f1,
-        #     f"{stage}/acc": dataset_acc,
-        #     f"{stage}/bacc": dataset_bacc,
-        #     f"{stage}/rec": dataset_rec,
-        #     f"{stage}/prec": dataset_prec,
-        # }
-
-        # self.log_dict(metrics, prog_bar=False)
 
         if stage != "train":
             output = self.val_metrics.compute()

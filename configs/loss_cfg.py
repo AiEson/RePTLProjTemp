@@ -1,14 +1,14 @@
-from torch import nn
 import torch.nn as nn
 import torch
 from segmentation_models_pytorch import losses as smploss
+import segmentation_models_pytorch as smp
 
 """
 def the loss dict with format: `loss_fn: [factor: float, need_sigmoid: bool]`
 """
 _LOSS_DICT = {
-    smploss.SoftBCEWithLogitsLoss(smooth_factor=0.1): [0.8, False],
-    smploss.JaccardLoss(mode=smploss.BINARY_MODE, smooth=0.1): [0.2, False],
+    smploss.SoftBCEWithLogitsLoss(): [1, False],
+    # smploss.JaccardLoss(mode=smploss.BINARY_MODE, smooth=0.1): [0.2, True],
 }
 
 
@@ -55,12 +55,13 @@ class SoftDiceLoss(nn.Module):
 bce_fn = nn.BCEWithLogitsLoss()
 dice_fn = SoftDiceLoss()
 
+softbce_fn = smp.losses.SoftBCEWithLogitsLoss()
 
 def loss_fn(y_pred, y_true):
-    bce = bce_fn(y_pred, y_true)
+    softbce = softbce_fn(y_pred, y_true)
     # dice = dice_fn(y_pred.sigmoid(), y_true)
     # return 0.8*bce + 0.2*dice
-    return bce
+    return softbce
 
 
 if __name__ == "__main__":
