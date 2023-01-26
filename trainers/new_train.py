@@ -1,6 +1,7 @@
 import inspect
 import os
 
+# get now real dir
 _NOW_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
