@@ -16,5 +16,3 @@ python train.py \
   --use_swa True \
   --optim_name adamw \
   --sche_name coswarmrestart \
-
-restart

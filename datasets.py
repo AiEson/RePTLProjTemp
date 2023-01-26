@@ -65,9 +65,12 @@ class TianChiDataset(D.Dataset):
         if not self.test_mode:
             mask = rle_decode(self.rles[index])
             augments = self.transform(image=img, mask=mask)
-            return self.as_tensor(augments["image"]), augments["mask"][None]
+            return {
+                "image": self.as_tensor(augments["image"]),
+                "mask": augments["mask"][None],
+            }
         else:
-            return self.as_tensor(img), ""
+            return {"image": self.as_tensor(augments["image"]), "mask": ""}
 
     def __len__(self):
         """

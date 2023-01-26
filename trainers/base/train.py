@@ -42,11 +42,11 @@ def main() -> None:
 
     # ------ Config Train Details -------
 
-    wandb_logger = WandbLogger(project=args.project, name=args.name)
+    wandb_logger = WandbLogger(project=args.project, name=args.name, group=args.name) # noqa
 
     # config checkpoint
     checkpoint_callback = ModelCheckpoint(
-        monitor="val/iou",
+        monitor="val/BinaryJaccardIndex",
         dirpath="checkpoints",
         filename=f"{args.name}" + "{val/iou:.4f}",
         save_top_k=5,
@@ -55,7 +55,7 @@ def main() -> None:
     )
 
     early_stop_callback = EarlyStopping(
-        monitor="val/iou", min_delta=1, patience=50, mode="min"
+        monitor="val/BinaryJaccardIndex", min_delta=1, patience=50, mode="min"
     )
 
     callback_list = [checkpoint_callback, early_stop_callback]
