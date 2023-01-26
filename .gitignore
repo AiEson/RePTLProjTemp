@@ -138,7 +138,9 @@ dataset/
 **/wandb/
 **/**/wandb/
 
-trainers/*
+**/**/checkpoints/
+
+trainers/**
 !trainers/base
 !trainers/template
 !trainers/new_train.py
