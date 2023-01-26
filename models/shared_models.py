@@ -10,10 +10,10 @@ from torch.utils.data import DataLoader, random_split
 sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), "../")))
 sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), "./")))
 
-from configure_optimizers import config_optimizers  # noqa
 
 from configs.loss_cfg import get_loss_result, loss_fn  # noqa
 from configs.metrics_cfg import get_metrics_collection  # noqa
+from configs.optim_sche_cfg import get_config_optimizers # noqa
 from datasets import get_building_dataset  # noqa
 
 
@@ -170,7 +170,7 @@ class PublicSMPModel(pl.LightningModule):
         return self.shared_epoch_end(outputs, "test")
 
     def configure_optimizers(self):
-        return config_optimizers(
+        return get_config_optimizers(
             optim_name=self.args.optim_name,
             sche_name=self.args.sche_name,
             model=self,  # model is self
