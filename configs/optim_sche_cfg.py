@@ -49,7 +49,7 @@ _SCHE_DICT = {
 }
 
 
-def config_optimizers(optim_name: str, model, sche_name: str = None):
+def get_config_optimizers(optim_name: str, model, sche_name: str = None):
     optimizer = _OPTS_DICT[optim_name][0](
         model.parameters(), **_OPTS_DICT[optim_name][1]
     )
