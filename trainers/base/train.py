@@ -1,16 +1,15 @@
-import argparse
-import glob
 import inspect
 import os
 import sys
 
-import numpy as np
 import pytorch_lightning as pl
-import torch
 import wandb
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
+
+from configs.args_getter import get_args  # noqa
+from models.DeepLabv3p import DeepLabv3pLightningModule  # noqa
 
 sys.path.append(
     os.path.realpath(
@@ -28,21 +27,29 @@ sys.path.append(
     )
 )
 
-from configs.args_getter import get_args  # noqa
-from models.DeepLabv3p import DeepLabv3pLightningModule  # noqa
 
+def main(l_module: pl.LightningModule = None) -> None:
+    """base runner main method, to start a train.
 
-def main() -> None:
+    Parameters
+    ----------
+    l_module : pl.LightningModule
+        pytorch_lightning.LightningModule Class
+        e.g. DeepLabv3pLightningModule(pl.LightningModule)
+        default = None
+    """
     # get train args from get_args() func.
     args = get_args()
     # Set All random seeds
     pl.seed_everything(args.seed)
     # define the model
-    model = DeepLabv3pLightningModule(args)
+    model = DeepLabv3pLightningModule(args) if l_module is None else l_module(args)
 
     # ------ Config Train Details -------
 
-    wandb_logger = WandbLogger(project=args.project, name=args.name, group=args.name) # noqa
+    wandb_logger = WandbLogger(
+        project=args.project, name=args.name, group=args.name
+    )  # noqa
 
     # config checkpoint
     checkpoint_callback = ModelCheckpoint(

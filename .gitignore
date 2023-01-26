@@ -140,3 +140,5 @@ dataset/
 
 trainers/**
 !trainers/base
+!trainers/template
+!trainers/new_train.py
