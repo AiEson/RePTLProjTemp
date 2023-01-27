@@ -20,10 +20,10 @@ sys.path.append(
 )
 
 # Please Change the model LightningModule here ⬇️
-from models.DeepLabv3p import DeepLabv3pLightningModule  # noqa
+from models.UnetPlusPlus import UPPLightningModule  # noqa
 from trainers.base.train import main  # noqa
 
 if __name__ == "__main__":
     # Then here ⬇️
-    l_module = DeepLabv3pLightningModule
+    l_module = UPPLightningModule
     main(l_module=l_module)
