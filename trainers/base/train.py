@@ -62,7 +62,7 @@ def main(l_module: pl.LightningModule = None) -> None:
     )
 
     early_stop_callback = EarlyStopping(
-        monitor="val/BinaryJaccardIndex", min_delta=1, patience=50, mode="min"
+        monitor="val/BinaryJaccardIndex", min_delta=1, patience=100, mode="min"
     )
 
     callback_list = [checkpoint_callback, early_stop_callback]
