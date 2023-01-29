@@ -13,7 +13,7 @@ python train.py \
   --epochs 64 \
   --batch_size 16 \
   --acc_batch 1 \
-  --gpus 3 \
+  --gpus -1 \
   --use_swa True \
   --optim_name adamw \
   --sche_name coswarmrestart \
