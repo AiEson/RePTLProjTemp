@@ -6,9 +6,9 @@ _NOW_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
 def main():
-    train_name = input("New train name:")
+    train_name = input("New train name: ")
     train_encoder = input(
-        "Train Encoder(available at https://smp.readthedocs.io/en/latest/encoders.html)\nname:"
+        "Train Encoder(available at https://smp.readthedocs.io/en/latest/encoders.html)\n Please Inpute Encoder name: "
     )
     # ------------- Config the Replace Rule ------------------
     _REPLACE_CONTENT = {"{{train_name}}": train_name, "{{encoder_name}}": train_encoder}
