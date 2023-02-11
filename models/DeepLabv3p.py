@@ -9,7 +9,7 @@ sys.path.append(
 )  # noqa
 sys.path.append(
     realpath(join(dirname(inspect.getfile(inspect.currentframe())), "./"))
-)  # noqa
+)  # noqa  ``
 
 from shared_models import PublicSMPModel  # noqa
 
