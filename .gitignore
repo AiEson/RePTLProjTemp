@@ -144,3 +144,4 @@ trainers/**
 !trainers/base
 !trainers/template
 !trainers/new_train.py
+models/encoders/ResNeSt_GSoP_Mean_SCA.py
