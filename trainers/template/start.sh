@@ -5,15 +5,15 @@ python train.py \
   --dataset_dir ~/codes/datasets/buildingSegDataset \
   --precision 16 \
   --img_size 512 \
-  --num_workers 8 \
+  --num_workers 12 \
   --project BuildingSeg \
   --name {{train_name}} \
   --encoder_name {{encoder_name}} \
   --seed 2004 \
-  --epochs 64 \
+  --epochs 72 \
   --batch_size 16 \
   --acc_batch 1 \
   --gpus -1 \
   --use_swa True \
   --optim_name adamw \
-  --sche_name coswarmrestart \
+  --sche_name reducelr \

@@ -9,14 +9,14 @@ sys.path.append(
 )  # noqa
 sys.path.append(
     realpath(join(dirname(inspect.getfile(inspect.currentframe())), "./"))
-)  # noqa  ``
+)  # noqa
 
 from shared_models import PublicSMPModel  # noqa
 
 
-class DeepLabv3pLightningModule(PublicSMPModel):
+class PSPNetLightningModule(PublicSMPModel):
     def __init__(self, args):
-        model = smp.DeepLabV3Plus(
+        model = smp.PSPNet(
             encoder_name=args.encoder_name,
             encoder_weights=None,
             in_channels=3,

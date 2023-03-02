@@ -44,7 +44,7 @@ _SCHE_DICT = {
     "cos": [tsch.CosineAnnealingLR, {"T_max": 100}],
     "coswarmrestart": [
         tsch.CosineAnnealingWarmRestarts,
-        {"T_0": 5, "T_mult": 1, "eta_min": G_EPS, "last_epoch": -1},
+        {"T_0": 10, "T_mult": 1, "eta_min": G_EPS, "last_epoch": -1},
     ],
 }
 
@@ -60,7 +60,7 @@ def get_config_optimizers(optim_name: str, model, sche_name: str = None):
         scheduler = _SCHE_DICT[sche_name][0](
             optimizer=optimizer, **_SCHE_DICT[sche_name][1]
         )
-    return {"optimizer": optimizer, "lr_scheduler": scheduler}
+        return {"optimizer": optimizer, "lr_scheduler": scheduler, 'monitor': 'val/BinaryJaccardIndex'}
 
 
 if __name__ == "__main__":
