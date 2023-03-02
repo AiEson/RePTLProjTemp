@@ -21,7 +21,6 @@ from timm.models.registry import register_model
 from timm.models.resnet import ResNet
 
 from . import MPNCOV
-from .att_block import SELayer
 
 """ Split Attention Conv2d (for ResNeSt Models)
 
@@ -499,10 +498,6 @@ class ResNestBottleneck(nn.Module):
         self.downsample = downsample
         self.attention = attention
 
-        self.se = (
-            SELayer(planes * self.expansion, reduction=16) if se else nn.Identity()
-        )
-
     def chan_att(self, out):
         # NxCxHxW
         out = self.relu_normal(out)
@@ -566,7 +561,6 @@ class ResNestBottleneck(nn.Module):
 
         out = self.conv3(out)
         out = self.bn3(out)
-        out = self.se(out)
 
         if self.downsample is not None:
             shortcut = self.downsample(x)

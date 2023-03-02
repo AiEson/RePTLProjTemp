@@ -1,3 +1,4 @@
+from cgi import test
 import os
 import warnings
 
@@ -109,3 +110,86 @@ def get_building_dataset(dataset_path: str, img_size=512):
     )
 
     return dataset
+
+class WHUDataset(D.Dataset):
+    def __init__(self, paths, transform, test_mode=False, img_size=512):
+        self.paths = paths
+        self.transform = transform
+        self.test_mode = test_mode
+
+        self.len = len(paths)
+        self.as_tensor = T.Compose(
+            [
+                T.ToPILImage(),
+                T.ToTensor(),
+                T.Normalize([0.4352682576428411, 0.44523221318154493, 0.41307610541534784], [0.026973196780331585, 0.026424642808887323, 0.02791246590291434]),
+            ]
+        )
+
+    # get data operation
+    def __getitem__(self, index):
+        img = cv2.imread(self.paths[index])
+        if not self.test_mode:
+            mask = cv2.imread(self.paths[index].replace("image", "label"), 0)
+            augments = self.transform(image=img, mask=mask)
+            return {
+                "image": self.as_tensor(augments["image"]),
+                "mask": augments["mask"][None],
+            }
+        else:
+            return {"image": self.as_tensor(augments["image"]), "mask": ""}
+
+    def __len__(self):
+        """
+        Total number of samples in the dataset
+        """
+        return self.len
+
+def get_building_dataset(dataset_path: str, img_size=512):
+    """Get the dataset by dataset_path.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Dataset Path, must contain `train` and `train_mask.csv` int the path.
+
+    Returns
+    -------
+        (train_set, val_set, test_set)
+
+    """
+    train_path = os.path.join(dataset_path, "train", 'image')
+    val_path = os.path.join(dataset_path, "val", 'image')
+    test_path = os.path.join(dataset_path, "test", 'image')
+    
+    train_set = WHUDataset(
+        paths = [os.path.join(train_path, x) for x in os.listdir(train_path)],
+        transform=get_train_transform(img_size),
+        test_mode=False,
+        img_size=img_size
+    )
+    
+    val_set = WHUDataset(
+        paths = [os.path.join(val_path, x) for x in os.listdir(val_path)],
+        transform=get_train_transform(img_size),
+        test_mode=False,
+        img_size=img_size
+    )
+    
+    test_set = WHUDataset(
+        paths = [os.path.join(test_path, x) for x in os.listdir(test_path)],
+        transform=get_train_transform(img_size),
+        test_mode=True,
+        img_size=img_size
+    )
+    
+
+    return train_set, val_set, test_set
+
+
+if __name__ == "__main__":
+    dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
+    train_set, val_set, test_set = get_building_dataset(dataset_root)
+    
+    print(len(train_set), len(val_set), len(test_set))
+    print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
