@@ -14,7 +14,7 @@ sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), 
 from configs.loss_cfg import get_loss_result, loss_fn  # noqa
 from configs.metrics_cfg import get_metrics_collection  # noqa
 from configs.optim_sche_cfg import get_config_optimizers  # noqa
-from datasets import get_building_dataset  # noqa
+from datasets import get_building_dataset, get_whu_dataset  # noqa
 
 
 class PublicSMPModel(pl.LightningModule):
@@ -138,11 +138,16 @@ class PublicSMPModel(pl.LightningModule):
         )
 
     def get_train_val_set(self):
-        all_set = get_building_dataset(dataset_path=self.args.dataset_dir)
-        setlen = len(all_set)
-        self.train_set, self.val_set = random_split(
-            all_set, [int(setlen * 0.8), int(setlen * 0.2)]
-        )
+        if self.args.dataset == "INRIA":
+            all_set = get_building_dataset(dataset_path=self.args.dataset_dir)
+            setlen = len(all_set)
+            self.train_set, self.val_set = random_split(
+                all_set, [int(setlen * 0.8), int(setlen * 0.2)]
+            )
+        elif self.args.dataset == "WHU":
+            self.train_set, self.val_set, self.test_set = get_whu_dataset(
+                dataset_path=self.args.dataset_dir
+            )
 
     def train_dataloader(self):
         return DataLoader(

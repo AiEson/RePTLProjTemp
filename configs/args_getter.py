@@ -25,5 +25,6 @@ def get_args():
 
     arg('--optim_name', type=str, default='adam')
     arg('--sche_name', type=str, default='coswarmrestart')
+    arg('--dataset', type=str, default='INRIA')
 
     return parser.parse_args()

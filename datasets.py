@@ -130,7 +130,7 @@ class WHUDataset(D.Dataset):
     def __getitem__(self, index):
         img = cv2.imread(self.paths[index])
         if not self.test_mode:
-            mask = cv2.imread(self.paths[index].replace("image", "label"), 0)
+            mask = cv2.imread(self.paths[index].replace("image", "label"), 0) / 255.0
             augments = self.transform(image=img, mask=mask)
             return {
                 "image": self.as_tensor(augments["image"]),
@@ -145,7 +145,7 @@ class WHUDataset(D.Dataset):
         """
         return self.len
 
-def get_building_dataset(dataset_path: str, img_size=512):
+def get_whu_dataset(dataset_path: str, img_size=512):
     """Get the dataset by dataset_path.
 
     Parameters
@@ -189,7 +189,11 @@ def get_building_dataset(dataset_path: str, img_size=512):
 
 if __name__ == "__main__":
     dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
-    train_set, val_set, test_set = get_building_dataset(dataset_root)
+    train_set, val_set, test_set = get_whu_dataset(dataset_root)
     
     print(len(train_set), len(val_set), len(test_set))
-    print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
+    print(train_set[0]['image'].shape, train_set[0]['mask'].max())
+    # dataset_root = '/home/zhaobinguet/codes/datasets/buildingSegDataset' 
+    # dataset = get_building_dataset(dataset_root)
+    # print(len(dataset))
+    # print(dataset[0]['image'].shape, dataset[0]['mask'].shape)
