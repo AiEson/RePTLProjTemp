@@ -21,7 +21,7 @@ sys.path.append(
 
 # Please Change the model LightningModule here ⬇️
 from models.UnetPlusPlus import UPPLightningModule  # noqa
-from trainers.base.train import main  # noqa
+from whu_trainers.base.train import main  # noqa
 
 if __name__ == "__main__":
     # Then here ⬇️

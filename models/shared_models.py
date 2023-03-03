@@ -60,6 +60,8 @@ class PublicSMPModel(pl.LightningModule):
             self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
             self.use_training_normlization = True
 
+        print("use_training_normlization: ", self.use_training_normlization)
+
         # for image segmentation dice loss could be the best first choice
         # self.loss_fn = smp.losses.DiceLoss(smp.losses.BINARY_MODE, from_logits=True)
 

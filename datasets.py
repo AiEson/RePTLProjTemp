@@ -118,11 +118,13 @@ class WHUDataset(D.Dataset):
         self.test_mode = test_mode
 
         self.len = len(paths)
+        print(paths)
         self.as_tensor = T.Compose(
             [
                 T.ToPILImage(),
                 T.ToTensor(),
-                T.Normalize([0.4352682576428411, 0.44523221318154493, 0.41307610541534784], [0.026973196780331585, 0.026424642808887323, 0.02791246590291434]),
+                # T.Normalize([0.4352682576428411, 0.44523221318154493, 0.41307610541534784], [0.026973196780331585, 0.026424642808887323, 0.02791246590291434]),
+                T.Normalize([0.625, 0.448, 0.688], [0.131, 0.177, 0.101]),
             ]
         )
 
@@ -192,8 +194,8 @@ if __name__ == "__main__":
     train_set, val_set, test_set = get_whu_dataset(dataset_root)
     
     print(len(train_set), len(val_set), len(test_set))
-    print(train_set[0]['image'].shape, train_set[0]['mask'].max())
+    print(train_set[0]['image'].max(), train_set[0]['image'].min(), train_set[0]['mask'].max(), train_set[0]['mask'].min())
     # dataset_root = '/home/zhaobinguet/codes/datasets/buildingSegDataset' 
     # dataset = get_building_dataset(dataset_root)
     # print(len(dataset))
-    # print(dataset[0]['image'].shape, dataset[0]['mask'].shape)
+    # print(dataset[0]['image'].min(), dataset[0]['mask'].shape)
