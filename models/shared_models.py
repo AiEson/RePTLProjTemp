@@ -51,10 +51,14 @@ class PublicSMPModel(pl.LightningModule):
         self.train_metrics = metrics.clone(prefix="train/")
         self.val_metrics = metrics.clone(prefix="val/")
 
+        self.use_training_normlization = False
+
         # preprocessing parameters for image
-        params = smp.encoders.get_preprocessing_params(args.encoder_name)
-        self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
-        self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
+        if args.encoder_name in smp.encoders.encoders:
+            params = smp.encoders.get_preprocessing_params(args.encoder_name)
+            self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
+            self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
+            self.use_training_normlization = True
 
         # for image segmentation dice loss could be the best first choice
         # self.loss_fn = smp.losses.DiceLoss(smp.losses.BINARY_MODE, from_logits=True)
@@ -63,7 +67,8 @@ class PublicSMPModel(pl.LightningModule):
         self.loss_fn = get_loss_result
 
     def forward(self, x):
-        x = (x - self.mean) / self.std
+        if self.use_training_normlization:
+            x = (x - self.mean) / self.std
         mask = self.model(x)
         return mask
 

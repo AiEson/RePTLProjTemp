@@ -78,6 +78,7 @@ def main(l_module: pl.LightningModule = None) -> None:
         accelerator="gpu",
         devices=args.gpus,
         log_every_n_steps=50,
+        # strategy="ddp",
         strategy="ddp_find_unused_parameters_false",
         logger=wandb_logger,
         callbacks=callback_list,
