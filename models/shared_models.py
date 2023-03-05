@@ -76,6 +76,7 @@ class PublicSMPModel(pl.LightningModule):
 
     def shared_step(self, batch, stage):
         image = batch["image"]
+        # print("image.shape: ", image.shape)
         assert image.ndim == 4, f"Error image tensor shape: {image.shape}"
 
         # Check that image dims are dicisible by 32
@@ -83,6 +84,7 @@ class PublicSMPModel(pl.LightningModule):
         assert h % 32 == 0 and w % 32 == 0
 
         mask = batch["mask"]
+        # print("mask.shape: ", mask.shape)
         # Shape of the mask should be [batch_size, num_classes, height, width]
         # for binary segmentation num_classes = 1
         assert mask.ndim == 4
@@ -104,7 +106,9 @@ class PublicSMPModel(pl.LightningModule):
             self.log_dict(output)
 
         else:
-            self.val_metrics.update(prob_mask, mask.long())
+            # self.val_metrics.update(prob_mask, mask.long())
+            output = self.val_metrics(prob_mask, mask.long())
+            self.log_dict(output)
 
         return {
             "loss": loss,
@@ -113,19 +117,21 @@ class PublicSMPModel(pl.LightningModule):
     def shared_epoch_end(self, outputs, stage):
 
         if stage != "train":
-            output = self.val_metrics.compute()
-            self.log_dict(output)
+            # output = self.val_metrics.compute()
+            # self.log_dict(output)
             self.val_metrics.reset()
         else:
             self.train_metrics.reset()
 
     def training_step(self, batch, batch_idx):
+        # print("training_step: ", len(batch))
         return self.shared_step(batch, "train")
 
     def training_epoch_end(self, outputs):
         return self.shared_epoch_end(outputs, "train")
 
     def validation_step(self, batch, batch_idx):
+        # print("validation_step: ", len(batch))
         return self.shared_step(batch, "val")
 
     def validation_epoch_end(self, outputs):
@@ -142,6 +148,7 @@ class PublicSMPModel(pl.LightningModule):
             optim_name=self.args.optim_name,
             sche_name=self.args.sche_name,
             model=self,  # model is self
+            base_lr=self.args.lr,
         )
 
     def get_train_val_set(self):

@@ -10,11 +10,12 @@ python train.py \
   --name {{train_name}} \
   --encoder_name {{encoder_name}} \
   --seed 2004 \
-  --epochs 72 \
+  --epochs 120 \
   --batch_size 16 \
   --acc_batch 1 \
   --gpus -1 \
   --use_swa True \
   --optim_name adamw \
-  --sche_name reducelr \
+  --sche_name coswarmrestart \
   --dataset WHU \
+  --lr 0.0005 \

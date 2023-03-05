@@ -20,6 +20,7 @@ def get_args():
     arg("--batch_size", type=int, default=16)
     arg("--acc_batch", type=int, default=1)
     arg("--gpus", type=int, default=-1)
+    arg("--lr", type=float, default=1e-4)
 
     arg('--use_swa', type=bool, default=False)
 
