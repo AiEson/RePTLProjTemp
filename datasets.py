@@ -112,13 +112,14 @@ def get_building_dataset(dataset_path: str, img_size=512):
     return dataset
 
 class WHUDataset(D.Dataset):
-    def __init__(self, paths, transform, test_mode=False, img_size=512):
+    def __init__(self, paths, transform, test_mode=False, img_size=512, label_folder_name='label', image_folder_name='image'):
         self.paths = paths
         self.transform = transform
         self.test_mode = test_mode
+        self.label_folder_name = label_folder_name
+        self.image_folder_name = image_folder_name
 
         self.len = len(paths)
-        print(paths)
         self.as_tensor = T.Compose(
             [
                 T.ToPILImage(),
@@ -132,7 +133,7 @@ class WHUDataset(D.Dataset):
     def __getitem__(self, index):
         img = cv2.imread(self.paths[index], -1)
         if not self.test_mode:
-            mask = cv2.imread(self.paths[index].replace("image", "label"), 0) // 255
+            mask = cv2.imread(self.paths[index].replace(self.image_folder_name, self.label_folder_name), 0) // 255
             augments = self.transform(image=img, mask=mask)
             return {
                 "image": self.as_tensor(augments["image"]),
@@ -189,19 +190,71 @@ def get_whu_dataset(dataset_path: str, img_size=512):
     return train_set, val_set, test_set
 
 
+def get_massachusetts_dataset(dataset_path: str, img_size=512):
+    """Get the dataset by dataset_path.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Dataset Path, must contain `train` and `train_mask.csv` int the path.
+
+    Returns
+    -------
+        (train_set, val_set, test_set)
+
+    """
+    train_path = os.path.join(dataset_path, "train")
+    val_path = os.path.join(dataset_path, "val")
+    test_path = os.path.join(dataset_path, "test")
+    
+    train_set = WHUDataset(
+        paths = [os.path.join(train_path, x) for x in os.listdir(train_path)],
+        transform=get_train_transform(img_size),
+        test_mode=False,
+        img_size=img_size,
+        image_folder_name='train',
+        label_folder_name='train_labels'
+    )
+    
+    val_set = WHUDataset(
+        paths = [os.path.join(val_path, x) for x in os.listdir(val_path)],
+        transform=get_train_transform(img_size),
+        test_mode=False,
+        img_size=img_size,
+        image_folder_name='val',
+        label_folder_name='val_labels'
+    )
+    
+    test_set = WHUDataset(
+        paths = [os.path.join(test_path, x) for x in os.listdir(test_path)],
+        transform=get_train_transform(img_size),
+        test_mode=True,
+        img_size=img_size,
+        image_folder_name='test',
+        label_folder_name='test_labels'
+    )
+    
+
+    return train_set, val_set, test_set
+
 if __name__ == "__main__":
-    dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
-    train_set, val_set, test_set = get_whu_dataset(dataset_root)
+    # dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
+    # train_set, val_set, test_set = get_whu_dataset(dataset_root)
+    
+    # print(len(train_set), len(val_set), len(test_set))
+    # print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
+    # print(train_set[0]['image'].max(), train_set[0]['image'].min(), train_set[0]['mask'].max(), train_set[0]['mask'].min())
+    # print(val_set[0]['image'].max(), val_set[0]['image'].min(), val_set[100]['mask'].max(), val_set[0]['mask'].min())
+    # dataset_root = '/home/zhaobinguet/codes/datasets/buildingSegDataset' 
+    # dataset = get_building_dataset(dataset_root)
+    # print(len(dataset))
+    # print(dataset[0]['image'].shape, dataset[0]['mask'].shape)
+    # print(dataset[0]['image'].max(), dataset[0]['image'].min(), dataset[0]['mask'].max(), dataset[0]['mask'].min())      
+    dataset_root = '/home/aieson/codes/datasets/Massachusetts_cropped512'
+    train_set, val_set, test_set = get_massachusetts_dataset(dataset_root)
     
     print(len(train_set), len(val_set), len(test_set))
     print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
-    print(train_set[0]['image'].max(), train_set[0]['image'].min(), train_set[0]['mask'].max(), train_set[0]['mask'].min())
-    print(val_set[0]['image'].max(), val_set[0]['image'].min(), val_set[100]['mask'].max(), val_set[0]['mask'].min())
-    dataset_root = '/home/zhaobinguet/codes/datasets/buildingSegDataset' 
-    dataset = get_building_dataset(dataset_root)
-    print(len(dataset))
-    print(dataset[0]['image'].shape, dataset[0]['mask'].shape)
-    print(dataset[0]['image'].max(), dataset[0]['image'].min(), dataset[0]['mask'].max(), dataset[0]['mask'].min())      
 
     
     

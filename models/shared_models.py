@@ -14,7 +14,7 @@ sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), 
 from configs.loss_cfg import get_loss_result, loss_fn  # noqa
 from configs.metrics_cfg import get_metrics_collection  # noqa
 from configs.optim_sche_cfg import get_config_optimizers  # noqa
-from datasets import get_building_dataset, get_whu_dataset  # noqa
+from datasets import get_building_dataset, get_whu_dataset, get_massachusetts_dataset  # noqa
 
 
 class PublicSMPModel(pl.LightningModule):
@@ -162,6 +162,10 @@ class PublicSMPModel(pl.LightningModule):
             self.train_set, self.val_set, self.test_set = get_whu_dataset(
                 dataset_path=self.args.dataset_dir
             )
+        elif self.args.dataset == "MASS":
+            self.train_set, self.val_set, self.test_set = get_massachusetts_dataset(
+                dataset_path=self.args.dataset_dir
+            ) 
 
     def train_dataloader(self):
         return DataLoader(
