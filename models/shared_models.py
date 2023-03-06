@@ -56,11 +56,11 @@ class PublicSMPModel(pl.LightningModule):
         self.use_training_normlization = False
 
         # preprocessing parameters for image
-        # if args.encoder_name in smp.encoders.encoders:
-        #     params = smp.encoders.get_preprocessing_params(args.encoder_name)
-        #     self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
-        #     self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
-        #     self.use_training_normlization = True
+        if args.encoder_name in smp.encoders.encoders:
+            params = smp.encoders.get_preprocessing_params(args.encoder_name)
+            self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
+            self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
+            self.use_training_normlization = True
 
         print("use_training_normlization: ", self.use_training_normlization)
 
@@ -76,8 +76,8 @@ class PublicSMPModel(pl.LightningModule):
             self.model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.model)
 
     def forward(self, x):
-        # if self.use_training_normlization:
-        #     x = (x - self.mean) / self.std
+        if self.use_training_normlization:
+            x = (x - self.mean) / self.std
         mask = self.model(x)
         return mask
 
