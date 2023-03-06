@@ -11,11 +11,12 @@ python train.py \
   --encoder_name timm-resnest26d-meangsop-sca \
   --seed 2004 \
   --steps 44500 \
+  --epochs 1000 \
   --batch_size 16 \
   --acc_batch 1 \
   --gpus -1 \
-  --use_swa False \
-  --optim_name adam \
+  --use_swa True \
+  --optim_name adamw \
   --sche_name reducelr \
   --dataset MASS \
-  --lr 0.0006 \
+  --lr 0.0008 \

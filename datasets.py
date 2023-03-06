@@ -1,5 +1,6 @@
 from cgi import test
 import os
+from PIL import Image
 import warnings
 
 import cv2
@@ -125,15 +126,24 @@ class WHUDataset(D.Dataset):
                 T.ToPILImage(),
                 T.ToTensor(),
                 # T.Normalize([0.4352682576428411, 0.44523221318154493, 0.41307610541534784], [0.026973196780331585, 0.026424642808887323, 0.02791246590291434]),
-                # T.Normalize([0.625, 0.448, 0.688], [0.131, 0.177, 0.101]),
-                T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+                T.Normalize([0.625, 0.448, 0.688], [0.131, 0.177, 0.101]),
+                # T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
             ]
         )
 
     # get data operation
     def __getitem__(self, index):
-        img = cv2.imread(self.paths[index], -1)
-        mask = cv2.imread(self.paths[index].replace(self.image_folder_name, self.label_folder_name), 0) // 255
+        img = Image.open(self.paths[index])
+        # mask 读取为灰度图
+        mask = Image.open(self.paths[index].replace(self.image_folder_name, self.label_folder_name))
+        # convert PIL.Image
+        img = img.convert('RGB')
+        mask = mask.convert('L')
+        # to numpy
+        img = np.array(img)
+        mask = np.array(mask)
+        # 增加通道
+        # mask = mask[None]
         # write
         # cv2.imwrite('test.png', img) 
         # cv2.imwrite('test_mask.png', mask * 255)
@@ -141,13 +151,14 @@ class WHUDataset(D.Dataset):
             augments = self.transform(image=img, mask=mask) if self.transform else {'image': img, 'mask': mask}
             # cv2.imwrite('test_aug.png', augments['image'])
             # cv2.imwrite('test_aug_mask.png', augments['mask'] * 255)
+            # 输出augments["mask"]的类型
             return {
                 "image": self.as_tensor(augments["image"]),
-                "mask": augments["mask"][None],
+                "mask": T.ToTensor()(augments["mask"]),
             }
         else:
             # print(mask[None].shape)
-            return {"image": self.as_tensor(img), "mask": mask[None]}
+            return {"image": self.as_tensor(img), "mask": mask}
 
     def __len__(self):
         """
