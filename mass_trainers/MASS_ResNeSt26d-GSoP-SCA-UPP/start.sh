@@ -19,4 +19,4 @@ python train.py \
   --optim_name adamw \
   --sche_name reducelr \
   --dataset MASS \
-  --lr 0.0008 \
+  --lr 0.0001 \
