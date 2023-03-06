@@ -1,7 +1,7 @@
 #!/bin/bash
 #template start.sh
 
-python train.py \
+python test.py \
   --dataset_dir ~/codes/datasets/Massachusetts_cropped512 \
   --precision 16 \
   --img_size 512 \
@@ -19,3 +19,4 @@ python train.py \
   --sche_name reducelr \
   --dataset MASS \
   --lr 0.0005 \
+  --best_ckpt_filename BinaryJaccardIndex=0.5560.ckpt \

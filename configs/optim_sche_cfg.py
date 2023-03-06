@@ -3,6 +3,8 @@ import torch
 import torch.optim as topt
 import torch.optim.lr_scheduler as tsch
 
+torch.set_float32_matmul_precision('medium')
+
 """
 Config the All Optimizers by Dict
 """

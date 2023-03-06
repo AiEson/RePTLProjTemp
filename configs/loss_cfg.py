@@ -56,16 +56,22 @@ bce_fn = nn.BCEWithLogitsLoss()
 dice_fn = SoftDiceLoss()
 
 softbce_fn = smp.losses.SoftBCEWithLogitsLoss()
+focal_fn = smp.losses.FocalLoss(mode=smp.losses.BINARY_MODE)
+dice_fn = smp.losses.DiceLoss(mode=smp.losses.BINARY_MODE, from_logits=True)
 
 
 def loss_fn(y_pred, y_true):
-    softbce = softbce_fn(y_pred, y_true)
+    # softbce = softbce_fn(y_pred, y_true)
+    # return softbce
     # dice = dice_fn(y_pred.sigmoid(), y_true)
     # return 0.8*bce + 0.2*dice
-    return softbce
+    # focal = focal_fn(y_pred, y_true)
+    # dice = dice_fn(y_pred, y_true)
+    # return focal + dice
+    return softbce_fn(y_pred, y_true)
 
 
 if __name__ == "__main__":
     a = torch.randn(1, 1, 64, 64)
     b = torch.randn(1, 1, 64, 64)
-    print(get_loss_result(a, b))
+    print(loss_fn(a, b))

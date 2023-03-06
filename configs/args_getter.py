@@ -16,7 +16,8 @@ def get_args():
 
     arg('--seed', type=int, default=42)
 
-    arg("--epochs", type=int, default=5)
+    arg("--epochs", type=int, default=None)
+    arg('--steps', type=int, default=None)
     arg("--batch_size", type=int, default=16)
     arg("--acc_batch", type=int, default=1)
     arg("--gpus", type=int, default=-1)
@@ -27,5 +28,6 @@ def get_args():
     arg('--optim_name', type=str, default='adam')
     arg('--sche_name', type=str, default='coswarmrestart')
     arg('--dataset', type=str, default='INRIA')
+    arg('--best_ckpt_filename', type=str, default=None)
 
     return parser.parse_args()

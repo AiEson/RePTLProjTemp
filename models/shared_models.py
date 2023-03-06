@@ -1,4 +1,5 @@
 import inspect
+from pprint import pprint
 import sys
 from os.path import dirname, join, realpath
 
@@ -6,6 +7,7 @@ import pytorch_lightning as pl
 import segmentation_models_pytorch as smp
 import torch
 from torch.utils.data import DataLoader, random_split
+import numpy as np
 
 sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), "../")))
 sys.path.append(realpath(join(dirname(inspect.getfile(inspect.currentframe())), "./")))
@@ -54,11 +56,11 @@ class PublicSMPModel(pl.LightningModule):
         self.use_training_normlization = False
 
         # preprocessing parameters for image
-        if args.encoder_name in smp.encoders.encoders:
-            params = smp.encoders.get_preprocessing_params(args.encoder_name)
-            self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
-            self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
-            self.use_training_normlization = True
+        # if args.encoder_name in smp.encoders.encoders:
+        #     params = smp.encoders.get_preprocessing_params(args.encoder_name)
+        #     self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
+        #     self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
+        #     self.use_training_normlization = True
 
         print("use_training_normlization: ", self.use_training_normlization)
 
@@ -66,11 +68,16 @@ class PublicSMPModel(pl.LightningModule):
         # self.loss_fn = smp.losses.DiceLoss(smp.losses.BINARY_MODE, from_logits=True)
 
         # Config the loss_fn
-        self.loss_fn = get_loss_result
+        self.loss_fn = loss_fn
+
+        # SyncBatchNorm
+        if (self.args.gpus == -1 and torch.cuda.device_count() > 1) or self.args.gpus > 1:
+            pprint("WARNING: Convert to SyncBatchNorm...")
+            self.model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.model)
 
     def forward(self, x):
-        if self.use_training_normlization:
-            x = (x - self.mean) / self.std
+        # if self.use_training_normlization:
+        #     x = (x - self.mean) / self.std
         mask = self.model(x)
         return mask
 
@@ -84,6 +91,8 @@ class PublicSMPModel(pl.LightningModule):
         assert h % 32 == 0 and w % 32 == 0
 
         mask = batch["mask"]
+        # to tensor
+        mask = torch.from_numpy(mask) if isinstance(mask, np.ndarray) else mask
         # print("mask.shape: ", mask.shape)
         # Shape of the mask should be [batch_size, num_classes, height, width]
         # for binary segmentation num_classes = 1
@@ -93,7 +102,7 @@ class PublicSMPModel(pl.LightningModule):
         # NOT 0 and 255 for binary segmentation
         assert mask.max() <= 1.0 and mask.min() >= 0
 
-        logits_mask = self(image)
+        logits_mask = self.forward(image)
 
         # get loss
         loss = self.loss_fn(logits_mask, mask.float())
@@ -106,9 +115,9 @@ class PublicSMPModel(pl.LightningModule):
             self.log_dict(output)
 
         else:
-            # self.val_metrics.update(prob_mask, mask.long())
-            output = self.val_metrics(prob_mask, mask.long())
-            self.log_dict(output)
+            self.val_metrics.update(prob_mask, mask.long())
+            # output = self.val_metrics(prob_mask, mask.long())
+            # self.log_dict(output)
 
         return {
             "loss": loss,
@@ -117,11 +126,12 @@ class PublicSMPModel(pl.LightningModule):
     def shared_epoch_end(self, outputs, stage):
 
         if stage != "train":
-            # output = self.val_metrics.compute()
-            # self.log_dict(output)
+            output = self.val_metrics.compute()
+            self.log_dict(output)
             self.val_metrics.reset()
         else:
             self.train_metrics.reset()
+            ...
 
     def training_step(self, batch, batch_idx):
         # print("training_step: ", len(batch))
@@ -174,7 +184,7 @@ class PublicSMPModel(pl.LightningModule):
             num_workers=self.args.num_workers,
             shuffle=True,
             pin_memory=True,
-            drop_last=True,
+            drop_last=False,
         )
 
     def val_dataloader(self):
@@ -184,8 +194,18 @@ class PublicSMPModel(pl.LightningModule):
             num_workers=self.args.num_workers,
             shuffle=False,
             pin_memory=True,
-            drop_last=True,
+            drop_last=False,
         )
+
+    def test_dataloader(self):
+        return DataLoader(
+            self.test_set,
+            batch_size=self.args.batch_size,
+            num_workers=self.args.num_workers,
+            shuffle=False,
+            pin_memory=True,
+            drop_last=False,
+        ) if self.args.dataset != "INRIA" else None
 
 
 if __name__ == "__main__":

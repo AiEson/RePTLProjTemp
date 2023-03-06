@@ -28,7 +28,7 @@ sys.path.append(
 )
 
 
-def main(l_module: pl.LightningModule = None) -> None:
+def test_main(l_module: pl.LightningModule = None) -> None:
     """base runner main method, to start a train.
 
     Parameters
@@ -40,6 +40,20 @@ def main(l_module: pl.LightningModule = None) -> None:
     """
     # get train args from get_args() func.
     args = get_args()
+    
+    
+    root_path = os.path.join('.', 'checkpoints', args.name + "_val")
+    if args.best_ckpt_filename is not None:
+        best_ckpt_path = os.path.join(root_path, args.best_ckpt_filename)
+    else:
+        ckpts = os.listdir(root_path)
+        # 按照=和.之间的数字进行排序
+        ckpts.sort(key=lambda x: float(x.split('=')[1].split('.')[1]))
+        print('ckpts: ', ckpts)
+        best_ckpt_path = os.path.join(root_path, ckpts[-1])
+    print('best_ckpt_path: ', best_ckpt_path)
+    
+    
     # Set All random seeds
     pl.seed_everything(args.seed)
     # define the model
@@ -77,20 +91,22 @@ def main(l_module: pl.LightningModule = None) -> None:
     trainer = pl.Trainer(
         accelerator="gpu",
         devices=args.gpus,
+        log_every_n_steps=50,
         strategy="ddp_find_unused_parameters_false",
         logger=wandb_logger,
         callbacks=callback_list,
         accumulate_grad_batches=args.acc_batch,
         precision=args.precision,
         max_epochs=args.epochs,
-        max_steps=args.steps
     )
     # Start Train
 
-    trainer.fit(model=model)
+    # trainer.fit(model=model)
+    trainer.test(model=model, ckpt_path=best_ckpt_path)
 
     wandb.finish()
 
 
 if __name__ == "__main__":
-    main()
+    
+    test_main()
