@@ -21,10 +21,10 @@ sys.path.append(
 
 # Please Change the model LightningModule here ⬇️
 from models.UnetPlusPlus import UPPLightningModule  # noqa
-from whu_trainers.base.train import main  # noqa
-from models.encoders import ResNeSt_GSoP_Mean_SCA # noqa
+from mass_trainers.base.test import test_main  # noqa
+from models.encoders import ResNeSt_GSoP_Mean_SCA
 
 if __name__ == "__main__":
     # Then here ⬇️
     l_module = UPPLightningModule
-    main(l_module=l_module)
+    test_main(l_module=l_module)

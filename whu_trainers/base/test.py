@@ -28,7 +28,7 @@ sys.path.append(
 )
 
 
-def main(l_module: pl.LightningModule = None) -> None:
+def test_main(l_module: pl.LightningModule = None) -> None:
     """base runner main method, to start a train.
 
     Parameters
@@ -40,6 +40,20 @@ def main(l_module: pl.LightningModule = None) -> None:
     """
     # get train args from get_args() func.
     args = get_args()
+    
+    
+    root_path = os.path.join('.', 'checkpoints', args.name + "_val")
+    if args.best_ckpt_filename is not None:
+        best_ckpt_path = os.path.join(root_path, args.best_ckpt_filename)
+    else:
+        ckpts = os.listdir(root_path)
+        # 按照=和.之间的数字进行排序
+        ckpts.sort(key=lambda x: float(x.split('=')[1].split('.')[1]))
+        print('ckpts: ', ckpts)
+        best_ckpt_path = os.path.join(root_path, ckpts[-1])
+    print('best_ckpt_path: ', best_ckpt_path)
+    
+    
     # Set All random seeds
     pl.seed_everything(args.seed)
     # define the model
@@ -62,7 +76,7 @@ def main(l_module: pl.LightningModule = None) -> None:
     )
 
     early_stop_callback = EarlyStopping(
-        monitor="val/BinaryJaccardIndex", min_delta=1, patience=10, mode="min", log_rank_zero_only=True
+        monitor="val/BinaryJaccardIndex", min_delta=1, patience=200, mode="min"
     )
 
     callback_list = [checkpoint_callback, early_stop_callback]
@@ -84,16 +98,15 @@ def main(l_module: pl.LightningModule = None) -> None:
         accumulate_grad_batches=args.acc_batch,
         precision=args.precision,
         max_epochs=args.epochs,
-        sync_batchnorm=True,
-        min_epochs=192,
-        benchmark=True,
     )
     # Start Train
 
-    trainer.fit(model=model)
+    # trainer.fit(model=model)
+    trainer.test(model=model, ckpt_path=best_ckpt_path)
 
     wandb.finish()
 
 
 if __name__ == "__main__":
-    main()
+    
+    test_main()

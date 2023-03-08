@@ -38,7 +38,7 @@ def get_dicts(G_LR=1e-4, G_EPS=1e-6, G_WD=1e-3):
             {
                 "patience": 5,
                 "factor": 0.5,
-                "mode": "max",
+                "mode": "min",
             },
         ],
         "cos": [tsch.CosineAnnealingLR, {"T_max": 100}],

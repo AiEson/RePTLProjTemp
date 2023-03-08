@@ -11,10 +11,11 @@ python train.py \
   --encoder_name timm-resnest101e-meangsop-sca \
   --seed 2004 \
   --steps 44500 \
+  --epochs 1000 \
   --batch_size 8 \
   --acc_batch 2 \
   --gpus -1 \
-  --use_swa False \
+  --use_swa True \
   --optim_name adamw \
   --sche_name reducelr \
   --dataset WHU \

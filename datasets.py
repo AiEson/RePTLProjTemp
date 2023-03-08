@@ -158,7 +158,7 @@ class WHUDataset(D.Dataset):
             }
         else:
             # print(mask[None].shape)
-            return {"image": self.as_tensor(img), "mask": mask}
+            return {"image": self.as_tensor(img), "mask": T.ToTensor()(mask)}
 
     def __len__(self):
         """
@@ -252,24 +252,26 @@ def get_massachusetts_dataset(dataset_path: str, img_size=512):
     return train_set, val_set, test_set
 
 if __name__ == "__main__":
-    # dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
-    # train_set, val_set, test_set = get_whu_dataset(dataset_root)
+    dataset_root = '/home/zhaobinguet/codes/datasets/WHU'
+    train_set, val_set, test_set = get_whu_dataset(dataset_root)
     
-    # print(len(train_set), len(val_set), len(test_set))
-    # print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
-    # print(train_set[0]['image'].max(), train_set[0]['image'].min(), train_set[0]['mask'].max(), train_set[0]['mask'].min())
-    # print(val_set[0]['image'].max(), val_set[0]['image'].min(), val_set[100]['mask'].max(), val_set[0]['mask'].min())
+    print(len(train_set), len(val_set), len(test_set))
+    print(train_set[0]['image'].shape, train_set[0]['mask'].shape)
+    print(train_set[0]['image'].max(), train_set[0]['image'].min(), train_set[0]['mask'].max(), train_set[0]['mask'].min())
+    print(val_set[0]['image'].max(), val_set[0]['image'].min(), val_set[100]['mask'].max(), val_set[0]['mask'].min())
+    # ----------------------------------------------
     # dataset_root = '/home/zhaobinguet/codes/datasets/buildingSegDataset' 
     # dataset = get_building_dataset(dataset_root)
     # print(len(dataset))
     # print(dataset[0]['image'].shape, dataset[0]['mask'].shape)
     # print(dataset[0]['image'].max(), dataset[0]['image'].min(), dataset[0]['mask'].max(), dataset[0]['mask'].min())      
-    dataset_root = '/home/aieson/codes/datasets/Massachusetts_cropped512'
-    train_set, val_set, test_set = get_massachusetts_dataset(dataset_root)
+    # ----------------------------------------------
+    # dataset_root = '/home/aieson/codes/datasets/Massachusetts_cropped512'
+    # train_set, val_set, test_set = get_massachusetts_dataset(dataset_root)
     
-    print(len(train_set), len(val_set), len(test_set))
-    print(train_set[10]['image'].shape, train_set[10]['mask'].shape)
-    print(train_set[10]['image'].max(), train_set[10]['image'].min(), train_set[10]['mask'].max(), train_set[10]['mask'].min())
+    # print(len(train_set), len(val_set), len(test_set))
+    # print(train_set[10]['image'].shape, train_set[10]['mask'].shape)
+    # print(train_set[10]['image'].max(), train_set[10]['image'].min(), train_set[10]['mask'].max(), train_set[10]['mask'].min())
 
     
     

@@ -32,7 +32,7 @@ class PublicSMPModel(pl.LightningModule):
         DeepLabV3Plus (ResNet34) as default.
     """
 
-    def __init__(self, model: smp.base.SegmentationModel = None, args=None):
+    def __init__(self, model: smp.base.SegmentationModel = None, args=None, sync_dist = True):
 
         super().__init__()
         if model is None:
@@ -46,6 +46,7 @@ class PublicSMPModel(pl.LightningModule):
             self.model = model
 
         self.args = args
+        self.sync_dist = sync_dist
         # Config the dataset
         self.get_train_val_set()
 
@@ -56,11 +57,11 @@ class PublicSMPModel(pl.LightningModule):
         self.use_training_normlization = False
 
         # preprocessing parameters for image
-        if args.encoder_name in smp.encoders.encoders:
-            params = smp.encoders.get_preprocessing_params(args.encoder_name)
-            self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
-            self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
-            self.use_training_normlization = True
+        # if args.encoder_name in smp.encoders.encoders:
+        #     params = smp.encoders.get_preprocessing_params(args.encoder_name)
+        #     self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
+        #     self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
+        #     self.use_training_normlization = True
 
         print("use_training_normlization: ", self.use_training_normlization)
 
@@ -102,56 +103,59 @@ class PublicSMPModel(pl.LightningModule):
         # NOT 0 and 255 for binary segmentation
         assert mask.max() <= 1.0 and mask.min() >= 0
 
-        logits_mask = self.forward(image)
+        logits_mask = self(image)
 
         # get loss
         loss = self.loss_fn(logits_mask, mask.float())
 
-        prob_mask = logits_mask.sigmoid()
+        # prob_mask = logits_mask.sigmoid()
+        # prob_mask = logits_mask 
         # pred_mask = (prob_mask > 0.5).float()
 
-        if stage == "train":
-            output = self.train_metrics(prob_mask, mask.long())
-            self.log_dict(output)
+        # if stage == "train":
+        #     train_metrics = self.train_metrics(prob_mask, mask.long())
+        #     self.log_dict(train_metrics, on_epoch=True, on_step=True)
 
+        # else:
+        #     self.val_metrics.update(prob_mask, mask.long())
+        #     # output = self.val_metrics(prob_mask, mask.long())
+        #     # self.log_dict(output)
+        self.log(f"{stage}/loss", loss, on_epoch=True, sync_dist=self.sync_dist)
+        if stage == "train":
+            self.log_dict(self.train_metrics(logits_mask, mask.long()), on_epoch=True, sync_dist=self.sync_dist)
         else:
-            self.val_metrics.update(prob_mask, mask.long())
-            # output = self.val_metrics(prob_mask, mask.long())
-            # self.log_dict(output)
+            self.log_dict(self.val_metrics(logits_mask, mask.long()), on_epoch=True, sync_dist=self.sync_dist)
 
         return {
             "loss": loss,
         }
 
-    def shared_epoch_end(self, outputs, stage):
-
-        if stage != "train":
-            output = self.val_metrics.compute()
-            self.log_dict(output)
-            self.val_metrics.reset()
-        else:
-            self.train_metrics.reset()
-            ...
+    # def shared_epoch_end(self, outputs, stage):
+    #     if stage == "val" or stage == "test":
+    #         self.log_dict(self.val_metrics.compute())
+    #     if stage == "train":
+    #         self.train_metrics.reset()
+            
 
     def training_step(self, batch, batch_idx):
         # print("training_step: ", len(batch))
         return self.shared_step(batch, "train")
 
-    def training_epoch_end(self, outputs):
-        return self.shared_epoch_end(outputs, "train")
+    # def training_epoch_end(self, outputs):
+    #     return self.shared_epoch_end(outputs, "train")
 
     def validation_step(self, batch, batch_idx):
         # print("validation_step: ", len(batch))
         return self.shared_step(batch, "val")
 
-    def validation_epoch_end(self, outputs):
-        return self.shared_epoch_end(outputs, "val")
+    # def validation_epoch_end(self, outputs):
+    #     return self.shared_epoch_end(outputs, "val")
 
     def test_step(self, batch, batch_idx):
         return self.shared_step(batch, "test")
 
-    def test_epoch_end(self, outputs):
-        return self.shared_epoch_end(outputs, "test")
+    # def test_epoch_end(self, outputs):
+    #     return self.shared_epoch_end(outputs, "test")
 
     def configure_optimizers(self):
         return get_config_optimizers(
@@ -184,7 +188,7 @@ class PublicSMPModel(pl.LightningModule):
             num_workers=self.args.num_workers,
             shuffle=True,
             pin_memory=True,
-            drop_last=False,
+            drop_last=True,
         )
 
     def val_dataloader(self):
@@ -194,7 +198,7 @@ class PublicSMPModel(pl.LightningModule):
             num_workers=self.args.num_workers,
             shuffle=False,
             pin_memory=True,
-            drop_last=False,
+            drop_last=True,
         )
 
     def test_dataloader(self):

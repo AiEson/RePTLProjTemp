@@ -22,6 +22,7 @@ sys.path.append(
 # Please Change the model LightningModule here ⬇️
 from models.UnetPlusPlus import UPPLightningModule  # noqa
 from whu_trainers.base.train import main  # noqa
+from models.encoders import ResNeSt_GSoP_Mean_SCA # noqa
 
 if __name__ == "__main__":
     # Then here ⬇️
